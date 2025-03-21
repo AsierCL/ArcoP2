@@ -11,20 +11,25 @@
 #include "./counter.h"
 
 
-void rellenarMatriz(float **a, float *b, float *x, int n, int i) {
-    float suma_fila = 0.0f;
-    // Inicializa cada elemento de la fila con (float)rand()/RAND_MAX
-    for (int j = 0; j < n; j++) {
-        a[i][j] = (float)rand() / RAND_MAX;
-        suma_fila += a[i][j];
-    }
-    // 3. Al elemento de la diagonal se le suma la suma total de la fila
-    a[i][i] += suma_fila;
+void rellenarMatriz(float **a, float *b, float *x, int n) {
+    // Inicialización de la matriz y de los vectores
+    for (int i = 0; i < n; i++) {
+        float suma_fila = 0.0f;
+        
+        // Inicializa cada elemento de la fila con (float)rand()/RAND_MAX
+        a[i] = _mm_malloc(n * sizeof(float), 64);
+        for (int j = 0; j < n; j++) {
+            a[i][j] = (float)rand() / RAND_MAX;
+            suma_fila += a[i][j];
+        }
+        // 3. Al elemento de la diagonal se le suma la suma total de la fila
+        a[i][i] += suma_fila;
 
-    // Inicializa el vector b aleatoriamente
-    b[i] = (float)rand() / RAND_MAX;
-    // Inicializa el vector x con ceros
-    x[i] = 0.0f;
+        // Inicializa el vector b aleatoriamente
+        b[i] = (float)rand() / RAND_MAX;
+        // Inicializa el vector x con ceros
+        x[i] = 0.0f;
+    }
 }
 
 void imprimirMatriz(float **a, int n) {
@@ -55,13 +60,12 @@ int main(int argc, char const *argv[]) {
     
     float norm2 = 0;
 
+    rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
 
     for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
         for (int i = 0; i < n; i++) {
-            a[i] = _mm_malloc(n * sizeof(float), 64);
-            rellenarMatriz(a, b, x, n, i);
             float sigma = 0;
             for (int j = 0; j < n; j++) {
                 if(i!=j){
