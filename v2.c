@@ -42,6 +42,7 @@ void imprimirMatriz(float **a, int n) {
 }
 
 int main(int argc, char const *argv[]) {
+    start_counter();
     if(argc != 3) {
         printf("Usage: %s <n> <c>\n", argv[0]);
         return 1;
@@ -59,13 +60,13 @@ int main(int argc, char const *argv[]) {
     float *x_new = _mm_malloc(n * sizeof(float), 64);
     
     float norm2 = 0;
-
+    
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
-
+    
     for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i+=2) {
             float sigma = 0;
             for (int j = 0; j < n; j++) {
                 if(i!=j){
@@ -73,18 +74,24 @@ int main(int argc, char const *argv[]) {
                 }
             }
             x_new[i] = (b[i] - sigma) / a[i][i];
+            x_new[i+1] = (b[i+1] - sigma) / a[i+1][i+1];
             norm2 += pow(x_new[i] - x[i], 2);
+            norm2 += pow(x_new[i+1] - x[i+1], 2);
         }
-
+        
         //x = x_new;
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
             printf("Tolerancia alcanzada en la iteración %d\n", iter);
             printf("Norma2: %e\n", norm2);
+            double cycles = get_counter();
+            printf("Cycles: %f\n", cycles);
             return 0;
         }
     }
     
     printf("Norma2: %e\n", norm2);
+    double cycles = get_counter();
+    printf("Cycles: %f\n", cycles);
     return 0;
 }
