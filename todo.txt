@@ -1,0 +1,42 @@
+Cambiar a suma de i+=2, e en vez de sumar no bucle, sumar ds's do calculo de x_new e norm2
+
+for (int i = bi; i < bi+bsize; i+=2) {
+                    float sigma[2];
+                    sigma[0] = 0;
+                    sigma[1] = 0;
+                    for (int j = bj; j < bj+bsize; j++) {
+                        if(i!=j){
+                            sigma[0] += a[i][j] * x[j];
+                        }
+                        if((i+1)!=j){
+                            sigma[1] += a[i+1][j] * x[j];
+                        }
+                    }
+                    x_new[i] = (b[i] - sigma[0]) / a[i][i];
+                    norm2 += pow(x_new[i] - x[i], 2);
+                    x_new[i+1] = (b[i+1] - sigma[1]) / a[i+1][i+1];
+                    norm2 += pow(x_new[i+1] - x[i+1], 2);
+                    printf("norm2: %f\n", norm2);
+                }
+            
+for (int i = bi; i < bi+bsize;) {
+                    float sigma[2];
+                    sigma[0] = 0;
+                    sigma[1] = 0;
+                    for (int j = bj; j < bj+bsize; j++) {
+                        if(i!=j){
+                            sigma[0] += a[i][j] * x[j];
+                        }
+                        if((i+1)!=j){
+                            sigma[1] += a[i+1][j] * x[j];
+                        }
+                    }
+                    x_new[i] = (b[i] - sigma[0]) / a[i][i];
+                    norm2 += pow(x_new[i] - x[i], 2);
+                    i++;
+                    x_new[i+1] = (b[i+1] - sigma[1]) / a[i+1][i+1];
+                    norm2 += pow(x_new[i+1] - x[i+1], 2);
+                    i++;
+                    printf("norm2: %f\n", norm2);
+                }
+
