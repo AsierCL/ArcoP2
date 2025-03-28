@@ -42,7 +42,6 @@ void imprimirMatriz(float **a, int n) {
 }
 
 int main(int argc, char const *argv[]) {
-    start_counter();
     if(argc != 3) {
         printf("Usage: %s <n> <c>\n", argv[0]);
         return 1;
@@ -64,6 +63,8 @@ int main(int argc, char const *argv[]) {
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
     
+
+    start_counter();
     for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
         for (int i = 0; i < n; i+=2) {
@@ -82,16 +83,16 @@ int main(int argc, char const *argv[]) {
         //x = x_new;
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
+            double cycles = get_counter();
             printf("Tolerancia alcanzada en la iteración %d\n", iter);
             printf("Norma2: %e\n", norm2);
-            double cycles = get_counter();
             printf("Cycles: %f\n", cycles);
             return 0;
         }
     }
+    double cycles = get_counter();
     
     printf("Norma2: %e\n", norm2);
-    double cycles = get_counter();
     printf("Cycles: %f\n", cycles);
     return 0;
 }
