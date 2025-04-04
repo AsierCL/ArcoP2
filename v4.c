@@ -4,6 +4,7 @@
 #include <immintrin.h>
 #include <pmmintrin.h>
 #include <string.h>
+#include <omp.h>
 #include <math.h>
 
 
@@ -47,11 +48,7 @@ int main(int argc, char const *argv[]) {
     }
 
     int n = atoi(argv[1]);
-    if(n % 8 != 0) {
-        printf("n debe ser múltiplo de 8\n");
-        return 1;
-    }
-    int c = atoi(argv[2]);
+    int c = atoi(argv[2]);  // Numero de hilos
     srand(1);
 
     float **a = _mm_malloc(n * sizeof(float *), 64);
@@ -60,45 +57,27 @@ int main(int argc, char const *argv[]) {
     float tol = 10e-8;
     int max_iter = 20000;
     float *x_new = _mm_malloc(n * sizeof(float), 64);
-
-    int bsize = 8;
-
-
     
     float norm2 = 0;
-    
+
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
 
     start_counter();
-    for (int iter = 0; iter < 1; iter++) {
+    for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
-
-        for(int bi = 0; bi < n; bi+=bsize){
-            for(int bj = 0; bj < n; bj+=bsize){
-
-                for (int i = bi; i < bi+bsize; i+=2) {
-                    float sigma[2];
-                    sigma[0] = 0;
-                    sigma[1] = 0;
-                    for (int j = bj; j < bj+bsize; j++) {
-                        if(i!=j){
-                            sigma[0] += a[i][j] * x[j];
-                        }
-                        if((i+1)!=j){
-                            sigma[1] += a[i+1][j] * x[j];
-                        }
-                    }
-                    x_new[i] = (b[i] - sigma[0]) / a[i][i];
-                    x_new[i+1] = (b[i+1] - sigma[1]) / a[i+1][i+1];
-                    norm2 += pow(x_new[i] - x[i], 2);
-                    norm2 += pow(x_new[i+1] - x[i+1], 2);
-                    printf("norm2: %f\n", norm2);
+        for (int i = 0; i < n; i++) {
+            float sigma = 0;
+            for (int j = 0; j < n; j++) {
+                if(i!=j){
+                    sigma += a[i][j] * x[j];
                 }
             }
+            x_new[i] = (b[i] - sigma) / a[i][i];
+            norm2 += pow(x_new[i] - x[i], 2);
         }
 
-
+        //x = x_new;
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
             double cycles = get_counter();

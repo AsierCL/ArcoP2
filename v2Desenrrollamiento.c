@@ -4,7 +4,6 @@
 #include <immintrin.h>
 #include <pmmintrin.h>
 #include <string.h>
-#include <omp.h>
 #include <math.h>
 
 
@@ -50,7 +49,7 @@ int main(int argc, char const *argv[]) {
 
     int n = atoi(argv[1]);
     int c = atoi(argv[2]);
-    srand(n);
+    srand(1);
 
     float **a = _mm_malloc(n * sizeof(float *), 64);
     float *b = _mm_malloc(n * sizeof(float), 64);
@@ -63,7 +62,8 @@ int main(int argc, char const *argv[]) {
     
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
-    
+
+    start_counter();
     for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
         for (int i = 0; i < n; i+=2) {
@@ -82,16 +82,16 @@ int main(int argc, char const *argv[]) {
         //x = x_new;
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
+            double cycles = get_counter();
             printf("Tolerancia alcanzada en la iteración %d\n", iter);
             printf("Norma2: %e\n", norm2);
-            double cycles = get_counter();
             printf("Cycles: %f\n", cycles);
             return 0;
         }
     }
-    
-    printf("Norma2: %e\n", norm2);
     double cycles = get_counter();
+    printf("Iteraciones máximas alcanzadas\n");
+    printf("Norma2: %e\n", norm2);
     printf("Cycles: %f\n", cycles);
     return 0;
 }
