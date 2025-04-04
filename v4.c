@@ -58,19 +58,22 @@ int main(int argc, char const *argv[]) {
     int max_iter = 20000;
     float *x_new = _mm_malloc(n * sizeof(float), 64);
     
-    float norm2 = 0;
+    float norm2[c];
+    for (int i = 0; i < c; i++) {
+        norm2[i] = 0;
+    }
 
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
     start_counter();
     #pragma omp parallel num_threads(c)
-{
+    {
     int hilo = omp_get_thread_num();
     printf("Hilo %d\n", hilo);
 
-    #pragma omp for
     for (int iter = hilo; iter < max_iter; iter++) {
-        norm2 = 0;
+        norm2[hilo] = 0;
+        #pragma omp for
         for (int i = 0; i < n; i++) {
             float sigma = 0;
             for (int j = 0; j < n; j++) {
@@ -79,19 +82,25 @@ int main(int argc, char const *argv[]) {
                 }
             }
             x_new[i] = (b[i] - sigma) / a[i][i];
-            norm2 += (x_new[i] - x[i]) * (x_new[i] - x[i]);
+            norm2[hilo] += (x_new[i] - x[i]) * (x_new[i] - x[i]);
         }
         
+        float norm2_total = 0;
+        #pragma omp critical
+        {
+            for (int i = 0; i < c; i++) {
+                norm2_total += norm2[i];
+            }
         memcpy(x, x_new, n * sizeof(float));
-        if(sqrt(norm2) < tol) {
+        if(sqrt(norm2_total) < tol) {
             double cycles = get_counter();
             printf("Tolerancia alcanzada en la iteración %d\n", iter);
-            printf("Norma2: %e\n", norm2);
+            printf("Norma2: %e\n", norm2_total);
             printf("Cycles: %f\n", cycles);
             exit(0);
-        }
-    }
-}
+        }}
+    }}
+
     double cycles = get_counter();
     printf("Iteraciones máximas alcanzadas\n");
     printf("Norma2: %e\n", norm2);
