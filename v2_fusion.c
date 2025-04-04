@@ -73,7 +73,8 @@ int main(int argc, char const *argv[]) {
                 }
             }
             x_new[i] = (b[i] - sigma) / a[i][i];
-            norm2 += pow(x_new[i] - x[i], 2);
+            //norm2 += pow(x_new[i] - x[i], 2);
+            norm2 += (x_new[i] - x[i])*(x_new[i] - x[i]);
         }
 
         //x = x_new;

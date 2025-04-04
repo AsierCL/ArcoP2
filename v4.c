@@ -62,31 +62,36 @@ int main(int argc, char const *argv[]) {
 
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
-
     start_counter();
-    for (int iter = 0; iter < max_iter; iter++) {
+    #pragma omp parallel num_threads(c)
+{
+    int hilo = omp_get_thread_num();
+    printf("Hilo %d\n", hilo);
+
+    #pragma omp for
+    for (int iter = hilo; iter < max_iter; iter++) {
         norm2 = 0;
         for (int i = 0; i < n; i++) {
             float sigma = 0;
             for (int j = 0; j < n; j++) {
-                if(i!=j){
+                if(i != j){
                     sigma += a[i][j] * x[j];
                 }
             }
             x_new[i] = (b[i] - sigma) / a[i][i];
-            norm2 += pow(x_new[i] - x[i], 2);
+            norm2 += (x_new[i] - x[i]) * (x_new[i] - x[i]);
         }
-
-        //x = x_new;
+        
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
             double cycles = get_counter();
             printf("Tolerancia alcanzada en la iteración %d\n", iter);
             printf("Norma2: %e\n", norm2);
             printf("Cycles: %f\n", cycles);
-            return 0;
+            exit(0);
         }
     }
+}
     double cycles = get_counter();
     printf("Iteraciones máximas alcanzadas\n");
     printf("Norma2: %e\n", norm2);

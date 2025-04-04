@@ -68,12 +68,13 @@ int main(int argc, char const *argv[]) {
         for (int i = 0; i < n; i++) {
             float sigma = 0;
             for (int j = 0; j < n; j++) {
-                if(i!=j){
+                if(i!=j){  // Hai que buscar a forma de evitar o i!=j en extensions vectoriales
                     sigma += a[i][j] * x[j];
                 }
             }
             x_new[i] = (b[i] - sigma) / a[i][i];
-            norm2 += pow(x_new[i] - x[i], 2);
+            //norm2 += pow(x_new[i] - x[i], 2);
+            norm2 += (x_new[i] - x[i])*(x_new[i] - x[i]);
         }
 
         //x = x_new;
