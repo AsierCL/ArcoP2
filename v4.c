@@ -40,6 +40,15 @@ void imprimirMatriz(float **a, int n) {
         printf("\n");
     }
 }
+/* 
+printf("Iteraciones máximas alcanzadas\n");
+printf("Norma2: %e\n", norm2);
+printf("Cycles: %f\n", cycles);
+*/
+void csvPrint(int n, int iter, double cycles) {
+    printf("%d,%d,%f\n", n, iter, cycles);
+}
+
 
 int main(int argc, char const *argv[]) {
     if(argc < 2) {
@@ -73,14 +82,14 @@ int main(int argc, char const *argv[]) {
 
         /*
         #pragma omp parallel private(i, j, sigma) \
-                         shared(a, b, x, x_new, n, tol) \
-                         reduction(+:norm2) \
-                         num_threads(c)
+                shared(a, b, x, x_new, n, tol) \
+                reduction(+:norm2) \
+                num_threads(c)
         */
 
         #pragma omp parallel private(i, j, sigma) \
-                         shared(a, b, x, x_new, n, tol) \
-                         num_threads(c)
+                shared(a, b, x, x_new, n, tol) \
+                num_threads(c)
         {
             float local_norm = 0.0f;  // Acumulador por hilo
 
@@ -103,16 +112,12 @@ int main(int argc, char const *argv[]) {
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
             double cycles = get_counter();
-            printf("Tolerancia alcanzada en la iteración %d\n", iter);
-            printf("Norma2: %e\n", norm2);
-            printf("Cycles: %f\n", cycles);
+            csvPrint(n, max_iter, cycles);
             exit(0);
         }
     }
 
     double cycles = get_counter();
-    printf("Iteraciones máximas alcanzadas\n");
-    printf("Norma2: %e\n", norm2);
-    printf("Cycles: %f\n", cycles);
+    csvPrint(-1, max_iter, cycles);
     return 0;
 }
