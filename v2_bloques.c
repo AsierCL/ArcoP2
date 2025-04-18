@@ -64,7 +64,6 @@ int main(int argc, char const *argv[]) {
     float *x_new = _mm_malloc(n * sizeof(float), 64);
 
     int bsize = 8;
-
     float norm2 = 0;
     
     rellenarMatriz(a, b, x, n);
@@ -106,7 +105,6 @@ int main(int argc, char const *argv[]) {
                 }
             }
         }
-
 
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
