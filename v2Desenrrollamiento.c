@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]) {
     }
 
     int n = atoi(argv[1]);
-    int c = atoi(argv[2]);
+    (void)atoi(argv[2]); // c ignorado en esta versión
 
     srand(1);
     //srand(n);
@@ -69,14 +69,17 @@ int main(int argc, char const *argv[]) {
     for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
         for (int i = 0; i < n; i+=2) {
-            float sigma = 0;
+            float sigma0 = 0.0f, sigma1 = 0.0f;
             for (int j = 0; j < n; j++) {
                 if(i!=j){
-                    sigma += a[i][j] * x[j];
+                    sigma0 += a[i][j] * x[j];
+                }
+                if((i+1)!=j){
+                    sigma1 += a[i+1][j] * x[j];
                 }
             }
-            x_new[i] = (b[i] - sigma) / a[i][i];
-            x_new[i+1] = (b[i+1] - sigma) / a[i+1][i+1];
+            x_new[i] = (b[i] - sigma0) / a[i][i];
+            x_new[i+1] = (b[i+1] - sigma1) / a[i+1][i+1];
             //norm2 += pow(x_new[i] - x[i], 2);
             norm2 += (x_new[i] - x[i])*(x_new[i] - x[i]);
             //norm2 += pow(x_new[i+1] - x[i+1], 2);

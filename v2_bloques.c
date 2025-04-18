@@ -47,11 +47,11 @@ int main(int argc, char const *argv[]) {
     }
 
     int n = atoi(argv[1]);
-    if(n % 8 != 0) {
+    /*if(n % 8 != 0) {
         printf("n debe ser múltiplo de 8\n");
         return 1;
-    }
-    int c = atoi(argv[2]);
+    }*/
+    (void)atoi(argv[2]); // c ignorado en esta versión
 
     srand(1);
     //srand(n);
@@ -65,39 +65,44 @@ int main(int argc, char const *argv[]) {
 
     int bsize = 8;
 
-
-    
     float norm2 = 0;
     
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
 
     start_counter();
-    for (int iter = 0; iter < 1; iter++) {
+    for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
 
-        for(int bi = 0; bi < n; bi+=bsize){
-            for(int bj = 0; bj < n; bj+=bsize){
+        for (int bi = 0; bi < n; bi += bsize) {
 
-                for (int i = bi; i < bi+bsize; i+=2) {
-                    float sigma[2];
-                    sigma[0] = 0;
-                    sigma[1] = 0;
-                    for (int j = bj; j < bj+bsize; j++) {
+            int iEnd = ((bi + bsize) < n) ? (bi + bsize) : n;
+            // Para cada fila del bloque de filas
+            for (int i = bi; i < iEnd; i += 2) {
+                float sigma0 = 0.0f, sigma1 = 0.0f;
+          
+                // Acumular sobre todos los bloques de columnas
+                for (int bj = 0; bj < n; bj += bsize) {
+
+                    int jEnd = ((bj + bsize) < n) ? (bj + bsize) : n;
+
+                    for (int j = bj; j < jEnd; j++) {
                         if(i!=j){
-                            sigma[0] += a[i][j] * x[j];
+                            sigma0 += a[i][j] * x[j];
                         }
-                        if((i+1)!=j){
-                            sigma[1] += a[i+1][j] * x[j];
+                        if(i+1 < n && j != i+1){
+                            sigma1 += a[i+1][j] * x[j];
                         }
                     }
-                    x_new[i] = (b[i] - sigma[0]) / a[i][i];
-                    x_new[i+1] = (b[i+1] - sigma[1]) / a[i+1][i+1];
-                    //norm2 += pow(x_new[i] - x[i], 2);
-                    norm2 += (x_new[i] - x[i])*(x_new[i] - x[i]);
-                    //norm2 += pow(x_new[i+1] - x[i+1], 2);
-                    norm2 += (x_new[i+1] - x[i+1])*(x_new[i+1] - x[i+1]);
-                    printf("norm2: %f\n", norm2);
+                }
+                
+                // Actualización de soluciones
+                x_new[i] = (b[i] - sigma0) / a[i][i];
+                norm2 += (x_new[i] - x[i]) * (x_new[i] - x[i]);
+
+                if (i+1 < n) {
+                    x_new[i+1] = (b[i+1] - sigma1) / a[i+1][i+1];
+                    norm2 += (x_new[i+1] - x[i+1]) * (x_new[i+1] - x[i+1]);
                 }
             }
         }
