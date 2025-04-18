@@ -48,7 +48,9 @@ int main(int argc, char const *argv[]) {
 
     int n = atoi(argv[1]);
     int c = atoi(argv[2]);
+
     srand(1);
+    //srand(n);
 
     float **a = _mm_malloc(n * sizeof(float *), 64);
     float *b = _mm_malloc(n * sizeof(float), 64);

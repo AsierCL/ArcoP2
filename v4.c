@@ -42,14 +42,16 @@ void imprimirMatriz(float **a, int n) {
 }
 
 int main(int argc, char const *argv[]) {
-    if(argc != 3) {
+    if(argc < 2) {
         printf("Usage: %s <n> <c>\n", argv[0]);
         return 1;
     }
 
     int n = atoi(argv[1]);
-    int c = atoi(argv[2]);  // Numero de hilos
+    int c = atoi(argv[2]);  // Numero de hilos (opcional)
+
     srand(1);
+    //srand(n);
 
     float **a = _mm_malloc(n * sizeof(float *), 64);
     float *b = _mm_malloc(n * sizeof(float), 64);
@@ -57,49 +59,56 @@ int main(int argc, char const *argv[]) {
     float tol = 10e-8;
     int max_iter = 20000;
     float *x_new = _mm_malloc(n * sizeof(float), 64);
-    
-    float norm2[c];
-    for (int i = 0; i < c; i++) {
-        norm2[i] = 0;
-    }
 
+    float norm2 = 0.0f;
+    int i, j;
+    float sigma;
+    
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
+    
     start_counter();
-    #pragma omp parallel num_threads(c)
-    {
-    int hilo = omp_get_thread_num();
-    printf("Hilo %d\n", hilo);
+    for (int iter = 0; iter < max_iter; iter++) {
+        norm2 = 0.0f;  // Compartida en la región parallel
 
-    for (int iter = hilo; iter < max_iter; iter++) {
-        norm2[hilo] = 0;
-        #pragma omp for
-        for (int i = 0; i < n; i++) {
-            float sigma = 0;
-            for (int j = 0; j < n; j++) {
-                if(i != j){
-                    sigma += a[i][j] * x[j];
-                }
-            }
-            x_new[i] = (b[i] - sigma) / a[i][i];
-            norm2[hilo] += (x_new[i] - x[i]) * (x_new[i] - x[i]);
-        }
-        
-        float norm2_total = 0;
-        #pragma omp critical
+        /*
+        #pragma omp parallel private(i, j, sigma) \
+                         shared(a, b, x, x_new, n, tol) \
+                         reduction(+:norm2) \
+                         num_threads(c)
+        */
+
+        #pragma omp parallel private(i, j, sigma) \
+                         shared(a, b, x, x_new, n, tol) \
+                         num_threads(c)
         {
-            for (int i = 0; i < c; i++) {
-                norm2_total += norm2[i];
+            float local_norm = 0.0f;  // Acumulador por hilo
+
+            #pragma omp for schedule(static)
+            for (i = 0; i < n; i++) {
+                sigma = 0;
+                for (j = 0; j < n; j++) {
+                    if(i != j){
+                        sigma += a[i][j] * x[j];
+                    }
+                }
+                x_new[i] = (b[i] - sigma) / a[i][i];
+                local_norm += (x_new[i] - x[i]) * (x_new[i] - x[i]);
             }
+            
+            #pragma omp atomic
+            norm2 += local_norm;  // Suma hilo‑segura sin reduction
+        }
+                
         memcpy(x, x_new, n * sizeof(float));
-        if(sqrt(norm2_total) < tol) {
+        if(sqrt(norm2) < tol) {
             double cycles = get_counter();
             printf("Tolerancia alcanzada en la iteración %d\n", iter);
-            printf("Norma2: %e\n", norm2_total);
+            printf("Norma2: %e\n", norm2);
             printf("Cycles: %f\n", cycles);
             exit(0);
-        }}
-    }}
+        }
+    }
 
     double cycles = get_counter();
     printf("Iteraciones máximas alcanzadas\n");
