@@ -31,13 +31,8 @@ void rellenarMatriz(float **a, float *b, float *x, int n) {
     }
 }
 
-void imprimirMatriz(float **a, int n) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%f ", a[i][j]);
-        }
-        printf("\n");
-    }
+void csvPrint(int iter, double norm, unsigned long long int cycles) {
+    printf("%d,%e,%llu\n", iter, norm, cycles);
 }
 
 int main(int argc, char const *argv[]) {
@@ -83,15 +78,11 @@ int main(int argc, char const *argv[]) {
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
             double cycles = get_counter();
-            printf("Tolerancia alcanzada en la iteración %d\n", iter);
-            printf("Norma2: %e\n", norm2);
-            printf("Cycles: %f\n", cycles);
+            csvPrint(iter, norm2, cycles);
             return 0;
         }
     }
-    double cycles = get_counter();
-    printf("Iteraciones máximas alcanzadas\n");
-    printf("Norma2: %e\n", norm2);
-    printf("Cycles: %f\n", cycles);
+    unsigned long long int cycles = get_counter();
+    csvPrint(-1, norm2, cycles);
     return 0;
 }

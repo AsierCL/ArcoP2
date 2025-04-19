@@ -4,7 +4,6 @@
 #include <immintrin.h>
 #include <pmmintrin.h>
 #include <string.h>
-#include <omp.h>
 #include <math.h>
 
 
@@ -30,13 +29,8 @@ void rellenarMatriz(float **a, float *b, float *x, int n) {
     }
 }
 
-void imprimirMatriz(float **a, int n) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%f ", a[i][j]);
-        }
-        printf("\n");
-    }
+void csvPrint(int iter, double norm, unsigned long long int cycles) {
+    printf("%d,%e,%llu\n", iter, norm, cycles);
 }
 
 int main(int argc, char const *argv[]) {
@@ -64,6 +58,7 @@ int main(int argc, char const *argv[]) {
     rellenarMatriz(a, b, x, n);
     //imprimirMatriz(a, n);
 
+    start_counter();
     for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0;
         for (int i = 0; i < n; i++) {
@@ -80,12 +75,12 @@ int main(int argc, char const *argv[]) {
         //x = x_new;
         memcpy(x, x_new, n * sizeof(float));
         if(sqrt(norm2) < tol) {
-            printf("Tolerancia alcanzada en la iteración %d\n", iter);
-            printf("Norma2: %e\n", norm2);
+            double cycles = get_counter();
+            csvPrint(iter, norm2, cycles);;
             return 0;
         }
     }
-    
-    printf("Norma2: %e\n", norm2);
+    unsigned long long int cycles = get_counter();
+    csvPrint(-1, norm2, cycles);
     return 0;
 }

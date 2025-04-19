@@ -10,7 +10,7 @@ gcc v4.c -lm -fopenmp -o v4
 
 # 1) Define los valores de los parámetros
 param1_values=(250 2500 5000)
-param2_values=(1 16)
+param2_values=(1 16 64)
 repetitions=15
 
 # 2) Bucle anidado
