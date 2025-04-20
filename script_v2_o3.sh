@@ -6,7 +6,7 @@
 #       ./run_experiments.sh
 #
 
-gcc v1.c -lm -o3 -o v1
+gcc v2.c -lm -o3 -o v2
 
 # 1) Define los valores de los parámetros
 param1_values=(250 2500 5000)
