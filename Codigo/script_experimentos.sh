@@ -5,16 +5,4 @@
 # ATENCIÓN - Debes sustituir el NN por el número de equipo.
 #SBATCH --job-name p1acgNN
 
-# Sustituir los valores de Di y Li por los calculados para la realización de la práctica.
-
-gcc acp1.c -o acp1 -msse3 -O0
-
-for i in {1..10}
-do
-	for D in {D1,D2,D3,D4,D5}
-	do
-			./acp1 $D 1
-	done
-done
-
-
+bash script_v4_o3.sh
