@@ -67,16 +67,16 @@ int main(int argc, char const *argv[]) {
     for (int iter = 0; iter < max_iter; iter++) {
         norm2 = 0.0f;  // Compartida en la región parallel
 
-        /*
+        
         #pragma omp parallel private(i, j, sigma) \
                 shared(a, b, x, x_new, n, tol) \
                 reduction(+:norm2) \
                 num_threads(c)
-        */
+        
 
-        #pragma omp parallel private(i, j, sigma) \
+        /*#pragma omp parallel private(i, j, sigma) \
                 shared(a, b, x, x_new, n, tol) \
-                num_threads(c)
+                num_threads(c)*/
         {
             float local_norm = 0.0f;  // Acumulador por hilo
 
@@ -92,7 +92,7 @@ int main(int argc, char const *argv[]) {
                 local_norm += (x_new[i] - x[i]) * (x_new[i] - x[i]);
             }
             
-            #pragma omp atomic
+            //#pragma omp atomic
             norm2 += local_norm;  // Suma hilo‑segura sin reduction
         }
                 
